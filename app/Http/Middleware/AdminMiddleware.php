@@ -4,17 +4,31 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
 class AdminMiddleware
 {
-    public function handle(Request $request, Closure $next): Response
+    /**
+     * Vérifie si l'utilisateur est administrateur.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle(Request $request, Closure $next)
     {
-        // Vérifiez si l'utilisateur est authentifié et est administrateur
-        if (!$request->user() || !$request->user()->is_admin) {
-            return redirect()->route('home')->with('error', 'Accès non autorisé.');
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé'
+                ], 403);
+            }
+            
+            return redirect()->route('home')
+                ->with('error', 'Accès réservé aux administrateurs');
         }
-
+        
         return $next($request);
     }
 }

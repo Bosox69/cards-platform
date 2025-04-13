@@ -5,6 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+Schema::create('order_items', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('template_id')->constrained();
+    $table->foreignId('department_id')->constrained();
+    $table->integer('quantity');
+    $table->boolean('is_double_sided')->default(false);
+    $table->string('pdf_preview')->nullable();
+    $table->timestamps();
+});
+
 class OrderItem extends Model
 {
     use HasFactory;

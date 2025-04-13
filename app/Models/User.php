@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -21,6 +20,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'client_id',
+        'is_admin',
+        'phone',
+        'job_title',
+        'last_login_at',
     ];
 
     /**
@@ -41,5 +45,48 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_admin' => 'boolean',
+        'last_login_at' => 'datetime',
     ];
+    
+    /**
+     * Relation avec le client (entreprise).
+     */
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+    
+    /**
+     * Relation avec les commandes.
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+    
+    /**
+     * Vérifie si l'utilisateur est administrateur.
+     */
+    public function isAdmin()
+    {
+        return $this->is_admin;
+    }
+    
+    /**
+     * Vérifie si l'utilisateur est un client.
+     */
+    public function isClient()
+    {
+        return !$this->is_admin && $this->client_id !== null;
+    }
+    
+    /**
+     * Enregistre la date de dernière connexion.
+     */
+    public function logLogin()
+    {
+        $this->last_login_at = now();
+        $this->save();
+    }
 }
