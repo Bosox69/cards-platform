@@ -13,6 +13,19 @@ return new class extends Migration
     {
         Schema::create('templates', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->foreignId('department_id')->constrained();
+            $table->string('background_front')->nullable();
+            $table->string('background_back')->nullable();
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->json('editable_fields')->nullable();
+            $table->text('back_content')->nullable();
+            $table->float('logo_x')->nullable();
+            $table->float('logo_y')->nullable();
+            $table->float('logo_width')->nullable();
+            $table->float('text_start_x')->nullable();
+            $table->float('text_start_y')->nullable();
             $table->timestamps();
         });
     }

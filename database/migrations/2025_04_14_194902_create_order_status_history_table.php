@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('order_status_history', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('client_id')->constrained();
+            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('order_status_id')->constrained('order_status');
+            $table->foreignId('user_id')->constrained(); // Utilisateur qui a changé le statut
             $table->text('comment')->nullable();
             $table->timestamps();
-            $table->softDeletes(); // Pour garder un historique des commandes supprimées
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('order_status_history');
     }
 };

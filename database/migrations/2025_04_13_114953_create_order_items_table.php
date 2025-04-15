@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('template_id')->constrained();
+            $table->foreignId('department_id')->constrained();
+            $table->integer('quantity');
+            $table->boolean('is_double_sided')->default(false);
+            $table->string('pdf_preview')->nullable();
             $table->timestamps();
         });
     }
