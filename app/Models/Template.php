@@ -5,39 +5,39 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-Schema::create('templates', function (Blueprint $table) {
-    $table->id();
-    $table->string('name');
-    $table->foreignId('department_id')->constrained();
-    $table->string('background_front')->nullable();
-    $table->string('background_back')->nullable();
-    $table->text('description')->nullable();
-    $table->boolean('is_active')->default(true);
-    $table->json('editable_fields');
-    $table->text('back_content')->nullable();
-    $table->float('logo_x')->nullable();
-    $table->float('logo_y')->nullable();
-    $table->float('logo_width')->nullable();
-    $table->float('text_start_x')->nullable();
-    $table->float('text_start_y')->nullable();
-    $table->timestamps();
-});
-
 class Template extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['name', 'file_path', 'description', 'is_double_sided', 'editable_fields', 'is_active'];
+    protected $fillable = [
+        'name', 
+        'department_id',
+        'background_front',
+        'background_back',
+        'description',
+        'is_active',
+        'editable_fields',
+        'back_content',
+        'logo_x',
+        'logo_y',
+        'logo_width',
+        'text_start_x',
+        'text_start_y'
+    ];
     
     protected $casts = [
         'editable_fields' => 'array',
-        'is_double_sided' => 'boolean',
         'is_active' => 'boolean',
+        'logo_x' => 'float',
+        'logo_y' => 'float',
+        'logo_width' => 'float',
+        'text_start_x' => 'float',
+        'text_start_y' => 'float'
     ];
     
-    public function departments()
+    public function department()
     {
-        return $this->belongsToMany(Department::class);
+        return $this->belongsTo(Department::class);
     }
     
     public function orderItems()

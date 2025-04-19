@@ -10,6 +10,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CardPreviewController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Admin\TemplateController as AdminTemplateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -74,5 +75,5 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::put('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.update-status');
     
     // Gestion des templates
-    Route::resource('templates', 'App\Http\Controllers\Admin\TemplateController');
+    Route::resource('templates', AdminTemplateController::class);
 });

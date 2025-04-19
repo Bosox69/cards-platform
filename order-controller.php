@@ -6,12 +6,14 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\CardData;
 use App\Models\Template;
+use App\Models\Department;
 use App\Models\OrderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderConfirmation;
 use App\Mail\NewOrderNotification;
+use App\Services\CardPdfGenerator;
 
 class OrderController extends Controller
 {

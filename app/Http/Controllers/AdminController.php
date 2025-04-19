@@ -162,5 +162,4 @@ class AdminController extends Controller
             
         return view('admin.dashboard', compact('stats', 'recentOrders', 'ordersByStatus'));
     }
-    
-    /**
+}
