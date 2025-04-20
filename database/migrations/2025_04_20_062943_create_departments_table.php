@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('card_data', function (Blueprint $table) {
+        Schema::create('departments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_item_id')->constrained()->cascadeOnDelete();
-            $table->json('data'); // Stockage des données personnalisées (nom, titre, email, etc.)
             $table->timestamps();
         });
     }
@@ -24,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('card_data');
+        Schema::dropIfExists('departments');
     }
 };

@@ -9,23 +9,19 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-
     public function up(): void
-{
-    Schema::create('order_status', function (Blueprint $table) {
-        $table->id();
-        $table->string('name');
-        $table->string('color_code')->nullable();
-        $table->integer('order')->default(0);
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('order_status_history', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_status');
+        Schema::dropIfExists('order_status_history');
     }
 };

@@ -13,3 +13,6 @@ import './bootstrap';
  */
 
 import './components/Example';
+
+// Après les imports existants
+import './components/CardCustomizer';
