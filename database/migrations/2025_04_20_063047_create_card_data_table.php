@@ -12,9 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('card_data', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+    $table->id();
+    $table->foreignId('order_item_id')->constrained()->onDelete('cascade');
+    $table->json('data');
+    $table->timestamps();
+});
     }
 
     /**
