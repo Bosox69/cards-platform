@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,34 +12,43 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Ajouter les clés étrangères pour users
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreign('client_id')->references('id')->on('clients')->onDelete('set null');
-        });
-
-        // Ajouter les clés étrangères pour orders
-        Schema::table('orders', function (Blueprint $table) {
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('client_id')->references('id')->on('clients');
-            $table->foreign('order_status_id')->references('id')->on('order_status');
-        });
-
-        // Ajouter les clés étrangères pour order_items
+        // Vérifier si les contraintes existent déjà avant de les ajouter
         Schema::table('order_items', function (Blueprint $table) {
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
-            $table->foreign('template_id')->references('id')->on('templates');
-            $table->foreign('department_id')->references('id')->on('departments');
+            // Vérifiez si la contrainte n'existe pas déjà
+            if (!$this->constraintExists('order_items', 'order_items_order_id_foreign')) {
+                $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            }
+            
+            if (!$this->constraintExists('order_items', 'order_items_template_id_foreign')) {
+                $table->foreign('template_id')->references('id')->on('templates');
+            }
+            
+            if (!$this->constraintExists('order_items', 'order_items_department_id_foreign')) {
+                $table->foreign('department_id')->references('id')->on('departments');
+            }
         });
 
         // Ajouter les clés étrangères pour templates
         Schema::table('templates', function (Blueprint $table) {
-            $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
+            if (!$this->constraintExists('templates', 'templates_department_id_foreign')) {
+                $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
+            }
         });
-        	Schema::table('card_data', function (Blueprint $table) {
-    		$table->foreign('order_item_id')->references('id')->on('order_items')->onDelete('cascade');	
-});
 
-        // Ajouter d'autres clés étrangères pour les tables restantes...
+        Schema::table('card_data', function (Blueprint $table) {
+            if (!$this->constraintExists('card_data', 'card_data_order_item_id_foreign')) {
+                $table->foreign('order_item_id')->references('id')->on('order_items')->onDelete('cascade');
+            }
+        });
+    }
+
+    /**
+     * Vérifie si une contrainte de clé étrangère existe déjà
+     */
+    private function constraintExists($table, $constraintName)
+    {
+        $constraints = DB::select("SHOW CREATE TABLE {$table}");
+        return strpos($constraints[0]->{'Create Table'}, $constraintName) !== false;
     }
 
     /**
@@ -46,25 +56,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Supprimer les clés étrangères dans l'ordre inverse
-        Schema::table('templates', function (Blueprint $table) {
-            $table->dropForeign(['department_id']);
-        });
-
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->dropForeign(['order_id', 'template_id', 'department_id']);
-        });
-
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropForeign(['user_id', 'client_id', 'order_status_id']);
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['client_id']);
-        });
-        Schema::table('card_data', function (Blueprint $table) {
-    $table->dropForeign(['order_item_id']);
-});
-
+        // Il est plus sûr de ne rien faire dans down() si nous ne sommes pas certains
+        // des contraintes qui ont été ajoutées par cette migration
     }
 };
