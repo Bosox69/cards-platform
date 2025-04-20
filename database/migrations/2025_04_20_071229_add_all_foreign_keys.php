@@ -34,6 +34,9 @@ return new class extends Migration
         Schema::table('templates', function (Blueprint $table) {
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
         });
+        	Schema::table('card_data', function (Blueprint $table) {
+    		$table->foreign('order_item_id')->references('id')->on('order_items')->onDelete('cascade');	
+});
 
         // Ajouter d'autres clés étrangères pour les tables restantes...
     }
@@ -59,5 +62,9 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['client_id']);
         });
+        Schema::table('card_data', function (Blueprint $table) {
+    $table->dropForeign(['order_item_id']);
+});
+
     }
 };

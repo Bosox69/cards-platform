@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('card_data', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('order_item_id')->constrained()->onDelete('cascade');
+    $table->foreignId('order_item_id');
     $table->json('data');
     $table->timestamps();
 });

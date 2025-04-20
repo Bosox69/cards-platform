@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_status_history', function (Blueprint $table) {
+        Schema::create('order_status', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id'); // Sans contrainte pour l'instant
-            $table->foreignId('order_status_id'); // Sans contrainte pour l'instant
-            $table->foreignId('user_id'); // Sans contrainte pour l'instant
-            $table->text('comment')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_status_history');
+        Schema::dropIfExists('order_status');
     }
 };
