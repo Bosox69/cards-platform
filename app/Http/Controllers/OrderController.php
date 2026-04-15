@@ -137,6 +137,10 @@ class OrderController extends Controller
      */
     public function removeFromCart(Request $request)
     {
+        $request->validate([
+            'itemId' => 'required|string|max:50',
+        ]);
+
         $itemId = $request->itemId;
         $cart = session()->get('cart', []);
         
@@ -164,8 +168,8 @@ class OrderController extends Controller
         }
         
         $item = $cart[$itemId];
-        $template = Template::findOrFail($item['template_id']);
-        
+        $template = Template::with('department.client')->findOrFail($item['template_id']);
+
         // Générer le PDF de prévisualisation
         $pdfGenerator = new CardPdfGenerator(
             $template,
@@ -209,12 +213,16 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'comment' => 'nullable|string|max:1000',
+        ]);
+
         $cart = session()->get('cart', []);
-        
+
         if(empty($cart)) {
             return redirect()->back()->with('error', 'Votre panier est vide');
         }
-        
+
         $user = Auth::user();
         
         // Trouver le statut "Nouvelle" pour les commandes
@@ -280,12 +288,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        $user = Auth::user();
-        
-        // Vérifier que l'utilisateur a accès à cette commande
-        if ($order->client_id != $user->client_id) {
-            abort(403, 'Vous n\'avez pas accès à cette commande');
-        }
+        $this->authorize('view', $order);
         
         $order->load(['orderItems.template', 'orderItems.cardData', 'orderStatus']);
         
@@ -300,12 +303,7 @@ class OrderController extends Controller
      */
     public function repeat(Order $order)
     {
-        $user = Auth::user();
-        
-        // Vérifier que l'utilisateur a accès à cette commande
-        if ($order->client_id != $user->client_id) {
-            abort(403, 'Vous n\'avez pas accès à cette commande');
-        }
+        $this->authorize('repeat', $order);
         
         $cart = [];
         

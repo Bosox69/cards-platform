@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,12 +39,9 @@ class DashboardController extends Controller
                 ->whereHas('orderStatus', function($query) {
                     $query->where('name', 'Complété');
                 })->count(),
-            'total_cards' => Order::where('client_id', $user->client_id)
-                ->with('orderItems')
-                ->get()
-                ->sum(function ($order) {
-                    return $order->orderItems->sum('quantity');
-                })
+            'total_cards' => (int) OrderItem::whereHas('order', function ($query) use ($user) {
+                    $query->where('client_id', $user->client_id);
+                })->sum('quantity')
         ];
         
         // Récupération des départements pour la création rapide d'une commande

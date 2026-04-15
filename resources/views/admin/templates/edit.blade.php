@@ -155,14 +155,21 @@
             return;
         }
         
-        fetch(`/api/clients/${clientId}/departments`)
+        fetch(`/admin/clients/${clientId}/departments`)
             .then(response => response.json())
             .then(departments => {
-                let options = '<option value="">Sélectionnez un département</option>';
+                const select = document.getElementById('department_id');
+                select.innerHTML = '';
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = 'Sélectionnez un département';
+                select.appendChild(defaultOpt);
                 departments.forEach(dept => {
-                    options += `<option value="${dept.id}">${dept.name}</option>`;
+                    const opt = document.createElement('option');
+                    opt.value = dept.id;
+                    opt.textContent = dept.name;
+                    select.appendChild(opt);
                 });
-                document.getElementById('department_id').innerHTML = options;
             })
             .catch(error => console.error('Erreur lors du chargement des départements:', error));
     }

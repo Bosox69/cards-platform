@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /c/Users/famil/cards-platform log --oneline)"
+    ]
+  }
+}

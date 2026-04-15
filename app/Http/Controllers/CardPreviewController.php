@@ -38,7 +38,7 @@ class CardPreviewController extends Controller
         }
 
         // Récupérer le modèle
-        $template = Template::findOrFail($request->template_id);
+        $template = Template::with('department.client')->findOrFail($request->template_id);
         
         // Vérifier que l'utilisateur a accès à ce modèle
         $user = $request->user();
@@ -66,9 +66,14 @@ class CardPreviewController extends Controller
                 'pdf_path' => $pdfPath
             ]);
         } catch (\Exception $e) {
+            \Log::error('PDF generation failed: ' . $e->getMessage(), [
+                'template_id' => $request->template_id,
+                'user_id' => $user->id,
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la génération du PDF: ' . $e->getMessage()
+                'message' => 'Une erreur est survenue lors de la génération du PDF. Veuillez réessayer.'
             ], 500);
         }
     }

@@ -85,6 +85,8 @@ class AdminController extends Controller
      */
     public function updateOrderStatus(Request $request, Order $order)
     {
+        $this->authorize('updateStatus', $order);
+
         $request->validate([
             'order_status_id' => 'required|exists:order_status,id'
         ]);

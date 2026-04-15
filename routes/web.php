@@ -61,9 +61,9 @@ Route::middleware(['auth'])->prefix('client')->name('client.')->group(function (
 });
 
 // Routes pour l'API (utilisé par les composants React)
-Route::middleware(['auth'])->prefix('api')->group(function () {
+Route::middleware(['auth', 'throttle:60,1'])->prefix('api')->group(function () {
     Route::get('/departments/{department}/templates', [TemplateController::class, 'getTemplatesForDepartment']);
-    Route::post('/preview-card', [CardPreviewController::class, 'generate']);
+    Route::post('/preview-card', [CardPreviewController::class, 'generate'])->middleware('throttle:pdf-generation');
 });
 
 // Routes protégées pour les administrateurs
@@ -76,4 +76,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     
     // Gestion des templates
     Route::resource('templates', AdminTemplateController::class);
+
+    // API AJAX pour les départements d'un client
+    Route::get('/clients/{clientId}/departments', [AdminTemplateController::class, 'getDepartments'])->name('clients.departments');
 });

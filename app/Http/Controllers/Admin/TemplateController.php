@@ -59,6 +59,8 @@ class TemplateController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Template::class);
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'department_id' => 'required|exists:departments,id',
@@ -111,6 +113,8 @@ class TemplateController extends Controller
      */
     public function update(Request $request, Template $template)
     {
+        $this->authorize('update', $template);
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'department_id' => 'required|exists:departments,id',
@@ -158,6 +162,8 @@ class TemplateController extends Controller
      */
     public function destroy(Template $template)
     {
+        $this->authorize('delete', $template);
+
         // Vérifier si le modèle est utilisé dans des commandes
         $orderItemsCount = $template->orderItems()->count();
         
@@ -199,7 +205,16 @@ class TemplateController extends Controller
      */
     private function storeTemplateImage($file)
     {
-        $filename = 'templates/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        // Utiliser l'extension dérivée du type MIME réel (pas celle fournie par le client)
+        $mimeType = $file->getMimeType();
+        $allowedMimes = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
+
+        $extension = $allowedMimes[$mimeType] ?? null;
+        if (!$extension) {
+            abort(422, 'Type de fichier non autorisé.');
+        }
+
+        $filename = 'templates/' . Str::uuid() . '.' . $extension;
         $file->storeAs('public', $filename);
         return $filename;
     }

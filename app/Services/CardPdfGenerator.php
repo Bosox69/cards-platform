@@ -71,8 +71,9 @@ class CardPdfGenerator
         }
         
         // Logo de l'entreprise
-        if ($this->template->client->logo) {
-            $this->addLogo($this->template->client->logo);
+        $client = $this->template->department->client;
+        if ($client && $client->logo) {
+            $this->addLogo($client->logo);
         }
         
         // Ajouter les informations de la carte
