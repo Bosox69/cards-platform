@@ -3,40 +3,36 @@
 @section('title', 'Modifier une carte')
 
 @section('content')
-<div class="bg-white rounded-lg shadow-md p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Modifier une carte</h1>
-        <a href="{{ route('client.orders.cart') }}" class="text-blue-500 hover:text-blue-700">
-            <i class="fas fa-arrow-left mr-1"></i> Retour au panier
-        </a>
+<div class="page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+        <h1>Modifier une carte</h1>
+        <p class="lead">Mettez à jour les informations avant validation.</p>
     </div>
-    
-    @if(session('error'))
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <span class="block sm:inline">{{ session('error') }}</span>
-        </div>
-    @endif
-    
-    <!-- Personnalisation de la carte -->
-    <div id="card-customizer" 
-         data-department-id="{{ $department->id }}" 
-         data-template-id="{{ $template->id }}"
-         data-item-id="{{ $itemId }}"
-         data-edit-mode="true"
-         data-card-data="{{ json_encode($item['card_data']) }}"
-         data-is-double-sided="{{ $item['is_double_sided'] ? 'true' : 'false' }}"
-         data-quantity="{{ $item['quantity'] }}">
-        <!-- Le composant React sera monté ici -->
-        <div class="text-center p-8">
-            <div class="spinner-border text-blue-500" role="status">
-                <span class="sr-only">Chargement...</span>
+    <a href="{{ route('client.orders.cart') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Retour au panier
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header py-3">
+        <h5 class="mb-0"><i class="fas fa-paint-brush me-2 text-primary"></i>Personnalisation</h5>
+    </div>
+    <div class="card-body">
+        <div id="card-customizer"
+             data-department-id="{{ $department->id }}"
+             data-template-id="{{ $template->id }}"
+             data-item-id="{{ $itemId }}"
+             data-edit-mode="true"
+             data-card-data="{{ json_encode($item['card_data']) }}"
+             data-is-double-sided="{{ $item['is_double_sided'] ? 'true' : 'false' }}"
+             data-quantity="{{ $item['quantity'] }}">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="text-muted mt-3 mb-0">Chargement du personnalisateur...</p>
             </div>
-            <p class="mt-2">Chargement du personnalisateur de carte...</p>
         </div>
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script src="{{ asset('js/app.js') }}"></script>
-@endpush

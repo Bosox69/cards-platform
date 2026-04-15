@@ -51,7 +51,8 @@ class TemplateController extends Controller
     public function create()
     {
         $clients = Client::orderBy('name')->get();
-        return view('admin.templates.create', compact('clients'));
+        $departments = collect();
+        return view('admin.templates.create', compact('clients', 'departments'));
     }
     
     /**

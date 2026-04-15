@@ -1,172 +1,169 @@
 @extends('layouts.admin')
 
-@section('title', 'Gestion des modèles de cartes')
+@section('title', 'Nouveau modèle')
 
 @section('content')
-<div class="bg-white shadow-md rounded-lg overflow-hidden">
-    <div class="p-6 bg-gray-50 border-b flex justify-between items-center">
-        <h1 class="text-2xl font-bold">Gestion des modèles de cartes</h1>
-        
-        <a href="{{ route('admin.templates.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded inline-flex items-center">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Nouveau modèle
-        </a>
+<div class="page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+        <h1>Nouveau modèle de carte</h1>
+        <p class="lead">Créez un nouveau modèle pour un département client.</p>
+    </div>
+    <a href="{{ route('admin.templates.index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+    </a>
+</div>
+
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <strong>Veuillez corriger les erreurs suivantes :</strong>
+        <ul class="mb-0 mt-2">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+<form action="{{ route('admin.templates.store') }}" method="POST" enctype="multipart/form-data">
+    @csrf
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header py-3">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>Informations de base</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-semibold">Nom du modèle</label>
+                        <input type="text" id="name" name="name" value="{{ old('name') }}" required
+                               class="form-control @error('name') is-invalid @enderror">
+                        @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="client_id" class="form-label fw-semibold">Client</label>
+                        <select id="client_id" class="form-select" onchange="loadDepartments(this.value)">
+                            <option value="">Sélectionnez un client</option>
+                            @foreach($clients as $client)
+                                <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
+                                    {{ $client->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="department_id" class="form-label fw-semibold">Département</label>
+                        <select id="department_id" name="department_id" required
+                                class="form-select @error('department_id') is-invalid @enderror">
+                            <option value="">Sélectionnez d'abord un client</option>
+                            @foreach($departments as $department)
+                                <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
+                                    {{ $department->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('department_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea id="description" name="description" rows="3" class="form-control">{{ old('description') }}</textarea>
+                    </div>
+
+                    <div class="form-check form-switch">
+                        <input type="hidden" name="is_active" value="0">
+                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1"
+                               {{ old('is_active', '1') ? 'checked' : '' }}>
+                        <label class="form-check-label fw-semibold" for="is_active">Modèle actif</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header py-3">
+                    <h5 class="mb-0"><i class="fas fa-image me-2 text-primary"></i>Images et mise en page</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="background_front" class="form-label fw-semibold">Arrière-plan recto</label>
+                        <input type="file" id="background_front" name="background_front" accept="image/jpeg,image/png"
+                               class="form-control @error('background_front') is-invalid @enderror">
+                        <div class="form-text">JPG ou PNG, 2 Mo max.</div>
+                        @error('background_front') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="background_back" class="form-label fw-semibold">Arrière-plan verso</label>
+                        <input type="file" id="background_back" name="background_back" accept="image/jpeg,image/png"
+                               class="form-control @error('background_back') is-invalid @enderror">
+                        @error('background_back') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="back_content" class="form-label fw-semibold">Contenu du verso</label>
+                        <textarea id="back_content" name="back_content" rows="3" class="form-control">{{ old('back_content') }}</textarea>
+                    </div>
+
+                    <h6 class="fw-semibold mt-4 mb-3 text-secondary text-uppercase small">
+                        <i class="fas fa-arrows-alt me-1"></i>Positionnement des éléments
+                    </h6>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-4">
+                            <label for="logo_x" class="form-label small">Logo X</label>
+                            <input type="number" step="0.1" id="logo_x" name="logo_x" value="{{ old('logo_x') }}" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="logo_y" class="form-label small">Logo Y</label>
+                            <input type="number" step="0.1" id="logo_y" name="logo_y" value="{{ old('logo_y') }}" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="logo_width" class="form-label small">Largeur logo</label>
+                            <input type="number" step="0.1" id="logo_width" name="logo_width" value="{{ old('logo_width') }}" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label for="text_start_x" class="form-label small">Début X du texte</label>
+                            <input type="number" step="0.1" id="text_start_x" name="text_start_x" value="{{ old('text_start_x') }}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="text_start_y" class="form-label small">Début Y du texte</label>
+                            <input type="number" step="0.1" id="text_start_y" name="text_start_y" value="{{ old('text_start_y') }}" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="p-6">
-        <!-- Filtres -->
-        <div class="mb-6">
-            <form action="{{ route('admin.templates.index') }}" method="GET" class="flex flex-wrap gap-4 items-end">
-                <div>
-                    <label for="client_id" class="block text-sm font-medium text-gray-700 mb-1">Client</label>
-                    <select id="client_id" name="client_id" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" onchange="loadDepartments(this.value)">
-                        <option value="">Tous les clients</option>
-                        @foreach($clients as $client)
-                            <option value="{{ $client->id }}" {{ request('client_id') == $client->id ? 'selected' : '' }}>
-                                {{ $client->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="department_id" class="block text-sm font-medium text-gray-700 mb-1">Département</label>
-                    <select id="department_id" name="department_id" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        <option value="">Tous les départements</option>
-                        @foreach($departments as $department)
-                            <option value="{{ $department->id }}" {{ request('department_id') == $department->id ? 'selected' : '' }}>
-                                {{ $department->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <div>
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
-                        Filtrer
-                    </button>
-                    <a href="{{ route('admin.templates.index') }}" class="ml-2 text-indigo-600 hover:text-indigo-800">
-                        Réinitialiser
-                    </a>
-                </div>
-            </form>
-        </div>
-        
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <span class="block sm:inline">{{ session('success') }}</span>
-            </div>
-        @endif
-        
-        @if(session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <span class="block sm:inline">{{ session('error') }}</span>
-            </div>
-        @endif
-        
-        <!-- Tableau des modèles -->
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nom
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Client / Département
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Aperçu
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Statut
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($templates as $template)
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $template->name }}</div>
-                                <div class="text-xs text-gray-500">ID: {{ $template->id }}</div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">{{ $template->department->client->name }}</div>
-                                <div class="text-sm text-gray-500">{{ $template->department->name }}</div>
-                            </td>
-                            <td class="px-6 py-4">
-                                @if($template->background_front)
-                                    <a href="{{ Storage::url($template->background_front) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">
-                                        <img src="{{ Storage::url($template->background_front) }}" alt="Aperçu" class="h-16 border">
-                                    </a>
-                                @else
-                                    <span class="text-gray-500 text-sm">Pas d'aperçu</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $template->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                    {{ $template->is_active ? 'Actif' : 'Inactif' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-2">
-                                    <a href="{{ route('admin.templates.edit', $template->id) }}" class="text-indigo-600 hover:text-indigo-900">
-                                        Modifier
-                                    </a>
-                                    
-                                    <form action="{{ route('admin.templates.destroy', $template->id) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce modèle?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900 ml-2">
-                                            Supprimer
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-500">
-                                Aucun modèle trouvé
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Pagination -->
-        <div class="mt-6">
-            {{ $templates->appends(request()->query())->links() }}
-        </div>
+    <div class="mt-4 d-flex justify-content-end gap-2">
+        <a href="{{ route('admin.templates.index') }}" class="btn btn-outline-secondary">Annuler</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>Créer le modèle
+        </button>
     </div>
-</div>
+</form>
 @endsection
 
 @push('scripts')
 <script>
     function loadDepartments(clientId) {
+        const select = document.getElementById('department_id');
         if (!clientId) {
-            // Si aucun client n'est sélectionné, vider la liste des départements
-            document.getElementById('department_id').innerHTML = '<option value="">Tous les départements</option>';
+            select.innerHTML = '<option value="">Sélectionnez d\'abord un client</option>';
             return;
         }
-        
-        // Appel AJAX pour récupérer les départements du client
+
         fetch(`/admin/clients/${clientId}/departments`)
             .then(response => response.json())
             .then(departments => {
-                const select = document.getElementById('department_id');
-                select.innerHTML = '';
-                const defaultOpt = document.createElement('option');
-                defaultOpt.value = '';
-                defaultOpt.textContent = 'Tous les départements';
-                select.appendChild(defaultOpt);
+                select.innerHTML = '<option value="">Sélectionnez un département</option>';
                 departments.forEach(dept => {
                     const opt = document.createElement('option');
                     opt.value = dept.id;

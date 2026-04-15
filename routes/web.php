@@ -11,6 +11,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CardPreviewController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\TemplateController as AdminTemplateController;
+use App\Http\Controllers\Admin\ClientController as AdminClientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +77,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     
     // Gestion des templates
     Route::resource('templates', AdminTemplateController::class);
+
+    // Gestion des clients
+    Route::resource('clients', AdminClientController::class)->except(['show']);
 
     // API AJAX pour les départements d'un client
     Route::get('/clients/{clientId}/departments', [AdminTemplateController::class, 'getDepartments'])->name('clients.departments');

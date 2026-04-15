@@ -3,58 +3,74 @@
 @section('title', 'Nouvelle commande')
 
 @section('content')
-<div class="bg-white rounded-lg shadow-md p-6">
-    <h1 class="text-2xl font-bold mb-6">Créer une nouvelle commande</h1>
-    
-    @if(session('error'))
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <span class="block sm:inline">{{ session('error') }}</span>
-        </div>
-    @endif
-    
-    <!-- Sélection du département -->
-    <div class="mb-8">
-        <h2 class="text-lg font-semibold mb-4">1. Sélectionnez un département</h2>
-        
+<div class="page-header mb-4">
+    <h1>Nouvelle commande</h1>
+    <p class="lead">Sélectionnez un département puis personnalisez votre carte de visite.</p>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header py-3">
+        <h5 class="mb-0">
+            <span class="badge bg-primary rounded-circle me-2" style="width:28px;height:28px;line-height:20px;">1</span>
+            Choisissez un département
+        </h5>
+    </div>
+    <div class="card-body">
         @if($departments->isEmpty())
-            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
-                <p>Aucun département n'est disponible. Veuillez contacter l'administrateur.</p>
+            <div class="alert alert-warning mb-0">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Aucun département n'est disponible. Veuillez contacter l'administrateur.
             </div>
         @else
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="row g-3">
                 @foreach($departments as $department)
-                    <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer {{ isset($selectedDepartment) && $selectedDepartment->id == $department->id ? 'border-blue-500 bg-blue-50' : '' }}"
-                         onclick="window.location.href='{{ route('client.orders.create', ['department_id' => $department->id]) }}'">
-                        <h3 class="font-semibold text-lg mb-1">{{ $department->name }}</h3>
-                        @if($department->description)
-                            <p class="text-gray-600 text-sm">{{ $department->description }}</p>
-                        @endif
+                    @php $isSelected = isset($selectedDepartment) && $selectedDepartment->id == $department->id; @endphp
+                    <div class="col-md-6 col-lg-4">
+                        <a href="{{ route('client.orders.create', ['department_id' => $department->id]) }}"
+                           class="card card-hover h-100 text-decoration-none border {{ $isSelected ? 'border-primary bg-primary bg-opacity-10' : '' }}">
+                            <div class="card-body d-flex align-items-start">
+                                <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 d-flex align-items-center">
+                                        {{ $department->name }}
+                                        @if($isSelected)
+                                            <i class="fas fa-check-circle text-primary ms-2"></i>
+                                        @endif
+                                    </h6>
+                                    @if($department->description)
+                                        <p class="small text-muted mb-0">{{ $department->description }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </a>
                     </div>
                 @endforeach
             </div>
         @endif
     </div>
-    
-    <!-- Personnalisation de la carte (affiché uniquement si un département est sélectionné) -->
-    @if(isset($selectedDepartment))
-        <div class="mt-8">
-            <h2 class="text-lg font-semibold mb-4">2. Personnalisez votre carte</h2>
-            
-            <div id="card-customizer" data-department-id="{{ $selectedDepartment->id }}" 
+</div>
+
+@if(isset($selectedDepartment))
+    <div class="card">
+        <div class="card-header py-3">
+            <h5 class="mb-0">
+                <span class="badge bg-primary rounded-circle me-2" style="width:28px;height:28px;line-height:20px;">2</span>
+                Personnalisez votre carte — {{ $selectedDepartment->name }}
+            </h5>
+        </div>
+        <div class="card-body">
+            <div id="card-customizer" data-department-id="{{ $selectedDepartment->id }}"
                  @if(request()->has('template_id')) data-template-id="{{ request('template_id') }}" @endif>
-                <!-- Le composant React sera monté ici -->
-                <div class="text-center p-8">
-                    <div class="spinner-border text-blue-500" role="status">
-                        <span class="sr-only">Chargement...</span>
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
                     </div>
-                    <p class="mt-2">Chargement du personnalisateur de carte...</p>
+                    <p class="text-muted mt-3 mb-0">Chargement du personnalisateur...</p>
                 </div>
             </div>
         </div>
-    @endif
-</div>
+    </div>
+@endif
 @endsection
-
-@push('scripts')
-<script src="{{ asset('js/app.js') }}"></script>
-@endpush

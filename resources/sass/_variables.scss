@@ -1,7 +1,39 @@
 // Body
-$body-bg: #f8fafc;
+$body-bg: #f4f6fb;
+$body-color: #2c3345;
 
 // Typography
-$font-family-sans-serif: 'Nunito', sans-serif;
-$font-size-base: 0.9rem;
+$font-family-sans-serif: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-size-base: 0.95rem;
 $line-height-base: 1.6;
+$headings-font-weight: 700;
+
+// Palette
+$primary:   #4f46e5;
+$secondary: #64748b;
+$success:   #10b981;
+$info:      #0ea5e9;
+$warning:   #f59e0b;
+$danger:    #ef4444;
+$light:     #f8fafc;
+$dark:      #1e293b;
+
+// Components
+$border-radius:       .5rem;
+$border-radius-sm:    .35rem;
+$border-radius-lg:    .75rem;
+
+$card-border-width:   0;
+$card-border-radius:  .75rem;
+$card-cap-bg:         transparent;
+$card-box-shadow:     0 1px 3px rgba(15, 23, 42, .06), 0 1px 2px rgba(15, 23, 42, .04);
+
+$input-border-radius: .5rem;
+$input-focus-border-color: lighten($primary, 20%);
+
+$btn-border-radius:   .5rem;
+$btn-font-weight:     600;
+
+$navbar-light-color:             rgba($dark, .75);
+$navbar-light-hover-color:       $primary;
+$navbar-light-active-color:      $primary;

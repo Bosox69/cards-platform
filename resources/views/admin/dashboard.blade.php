@@ -3,200 +3,203 @@
 @section('title', 'Tableau de bord administrateur')
 
 @section('content')
-<div class="container mx-auto px-4">
-    <!-- En-tête -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Tableau de bord administrateur</h1>
+<div class="page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+        <h1>Tableau de bord administrateur</h1>
+        <p class="lead">Vue d'ensemble de l'activité de la plateforme.</p>
     </div>
-    
-    <!-- Statistiques -->
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
-            <div class="text-gray-500 font-medium text-sm">Commandes totales</div>
-            <div class="text-2xl font-bold">{{ $stats['total_orders'] }}</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
-            <div class="text-gray-500 font-medium text-sm">En attente</div>
-            <div class="text-2xl font-bold">{{ $stats['pending_orders'] }}</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
-            <div class="text-gray-500 font-medium text-sm">En production</div>
-            <div class="text-2xl font-bold">{{ $stats['processing_orders'] }}</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-            <div class="text-gray-500 font-medium text-sm">Complétées</div>
-            <div class="text-2xl font-bold">{{ $stats['completed_orders'] }}</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
-            <div class="text-gray-500 font-medium text-sm">Clients</div>
-            <div class="text-2xl font-bold">{{ $stats['clients_count'] }}</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-indigo-500">
-            <div class="text-gray-500 font-medium text-sm">Modèles</div>
-            <div class="text-2xl font-bold">{{ $stats['templates_count'] }}</div>
-        </div>
+    <div>
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-primary">
+            <i class="fas fa-box me-2"></i>Gérer les commandes
+        </a>
     </div>
-    
-    <!-- Graphique des commandes par statut -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow">
-            <div class="border-b px-6 py-3">
-                <h2 class="text-xl font-semibold">Répartition des commandes</h2>
+</div>
+
+<div class="row g-3 mb-4">
+    @php
+        $tiles = [
+            ['label' => 'Commandes totales', 'value' => $stats['total_orders'],      'color' => 'primary', 'icon' => 'fa-file-invoice'],
+            ['label' => 'En attente',        'value' => $stats['pending_orders'],    'color' => 'warning', 'icon' => 'fa-clock'],
+            ['label' => 'En production',     'value' => $stats['processing_orders'], 'color' => 'info',    'icon' => 'fa-industry'],
+            ['label' => 'Complétées',        'value' => $stats['completed_orders'],  'color' => 'success', 'icon' => 'fa-check-circle'],
+            ['label' => 'Clients',           'value' => $stats['clients_count'],     'color' => 'secondary','icon' => 'fa-building'],
+            ['label' => 'Modèles',           'value' => $stats['templates_count'],   'color' => 'danger',  'icon' => 'fa-layer-group'],
+        ];
+    @endphp
+
+    @foreach($tiles as $tile)
+        <div class="col-sm-6 col-md-4 col-xl-2">
+            <div class="card stat-card h-100" style="border-left-color: var(--bs-{{ $tile['color'] }});">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon bg-{{ $tile['color'] }} bg-opacity-10 text-{{ $tile['color'] }} me-3">
+                        <i class="fas {{ $tile['icon'] }}"></i>
+                    </div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="stat-label text-truncate">{{ $tile['label'] }}</div>
+                        <div class="stat-value">{{ $tile['value'] }}</div>
+                    </div>
+                </div>
             </div>
-            <div class="p-4">
-                <div class="flex flex-col space-y-4">
+        </div>
+    @endforeach
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2 text-primary"></i>Répartition des commandes</h5>
+                <span class="text-muted small">Total : {{ $stats['total_orders'] }}</span>
+            </div>
+            <div class="card-body">
+                @if($ordersByStatus->isEmpty() || $stats['total_orders'] == 0)
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-chart-bar fa-2x mb-2 opacity-50"></i>
+                        <p class="mb-0">Aucune donnée à afficher pour le moment.</p>
+                    </div>
+                @else
                     @foreach($ordersByStatus as $status)
-                        <div class="flex items-center">
-                            <div class="w-32 text-sm">{{ $status->name }}</div>
-                            <div class="flex-1 bg-gray-200 rounded-full h-4">
-                                @php
-                                    $percentage = $stats['total_orders'] > 0 
-                                        ? round(($status->orders_count / $stats['total_orders']) * 100) 
-                                        : 0;
-                                    $color = 'bg-blue-500';
-                                    
-                                    if ($status->name == 'Nouvelle') $color = 'bg-blue-500';
-                                    elseif ($status->name == 'En traitement') $color = 'bg-yellow-500';
-                                    elseif ($status->name == 'En production') $color = 'bg-orange-500';
-                                    elseif ($status->name == 'Expédié') $color = 'bg-green-300';
-                                    elseif ($status->name == 'Complété') $color = 'bg-green-500';
-                                    elseif ($status->name == 'Annulé') $color = 'bg-red-500';
-                                @endphp
-                                
-                                <div class="{{ $color }} rounded-full h-4" style="width: {{ $percentage }}%"></div>
+                        @php
+                            $percentage = $stats['total_orders'] > 0
+                                ? round(($status->orders_count / $stats['total_orders']) * 100)
+                                : 0;
+                            $barColor = match($status->name) {
+                                'Nouvelle' => 'bg-info',
+                                'En traitement' => 'bg-warning',
+                                'En production' => 'bg-primary',
+                                'Expédié' => 'bg-info-subtle',
+                                'Complété' => 'bg-success',
+                                'Annulé' => 'bg-danger',
+                                default => 'bg-secondary',
+                            };
+                        @endphp
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-semibold small">{{ $status->name }}</span>
+                                <span class="small text-muted">
+                                    {{ $status->orders_count }} <span class="text-secondary">· {{ $percentage }}%</span>
+                                </span>
                             </div>
-                            <div class="w-16 text-right text-sm">{{ $status->orders_count }}</div>
-                            <div class="w-16 text-right text-sm text-gray-500">{{ $percentage }}%</div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar {{ $barColor }}" role="progressbar"
+                                     style="width: {{ $percentage }}%"
+                                     aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
                         </div>
                     @endforeach
-                </div>
+                @endif
             </div>
         </div>
-        
-        <div class="bg-white rounded-lg shadow">
-            <div class="border-b px-6 py-3">
-                <h2 class="text-xl font-semibold">Actions rapides</h2>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header py-3">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2 text-warning"></i>Actions rapides</h5>
             </div>
-            <div class="p-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <a href="{{ route('admin.orders.index', ['status' => 1]) }}" class="flex items-center p-4 border rounded hover:bg-gray-50">
-                        <div class="rounded-full bg-blue-100 p-3 mr-4">
-                            <i class="fas fa-inbox text-blue-500"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold">Nouvelles commandes</h3>
-                            <p class="text-sm text-gray-600">Traiter les commandes entrantes</p>
-                        </div>
-                    </a>
-                    
-                    <a href="{{ route('admin.orders.index', ['status' => 2]) }}" class="flex items-center p-4 border rounded hover:bg-gray-50">
-                        <div class="rounded-full bg-yellow-100 p-3 mr-4">
-                            <i class="fas fa-spinner text-yellow-500"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold">En traitement</h3>
-                            <p class="text-sm text-gray-600">Gérer les commandes en cours</p>
-                        </div>
-                    </a>
-                    
-                    <a href="{{ route('admin.templates.index') }}" class="flex items-center p-4 border rounded hover:bg-gray-50">
-                        <div class="rounded-full bg-indigo-100 p-3 mr-4">
-                            <i class="fas fa-id-card text-indigo-500"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold">Modèles</h3>
-                            <p class="text-sm text-gray-600">Gérer les modèles de cartes</p>
-                        </div>
-                    </a>
-                    
-                    <a href="{{ route('admin.orders.index') }}" class="flex items-center p-4 border rounded hover:bg-gray-50">
-                        <div class="rounded-full bg-green-100 p-3 mr-4">
-                            <i class="fas fa-list text-green-500"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold">Toutes les commandes</h3>
-                            <p class="text-sm text-gray-600">Voir l'historique complet</p>
-                        </div>
-                    </a>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <a href="{{ route('admin.orders.index', ['status' => 1]) }}" class="card card-hover h-100 text-decoration-none border">
+                            <div class="card-body">
+                                <div class="stat-icon bg-info bg-opacity-10 text-info mb-2"><i class="fas fa-inbox"></i></div>
+                                <h6 class="mb-1">Nouvelles commandes</h6>
+                                <p class="small text-muted mb-0">Traiter les commandes entrantes</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6">
+                        <a href="{{ route('admin.orders.index', ['status' => 2]) }}" class="card card-hover h-100 text-decoration-none border">
+                            <div class="card-body">
+                                <div class="stat-icon bg-warning bg-opacity-10 text-warning mb-2"><i class="fas fa-spinner"></i></div>
+                                <h6 class="mb-1">En traitement</h6>
+                                <p class="small text-muted mb-0">Gérer les commandes en cours</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6">
+                        <a href="{{ route('admin.templates.index') }}" class="card card-hover h-100 text-decoration-none border">
+                            <div class="card-body">
+                                <div class="stat-icon bg-primary bg-opacity-10 text-primary mb-2"><i class="fas fa-id-card"></i></div>
+                                <h6 class="mb-1">Modèles</h6>
+                                <p class="small text-muted mb-0">Gérer les modèles de cartes</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6">
+                        <a href="{{ route('admin.orders.index') }}" class="card card-hover h-100 text-decoration-none border">
+                            <div class="card-body">
+                                <div class="stat-icon bg-success bg-opacity-10 text-success mb-2"><i class="fas fa-list"></i></div>
+                                <h6 class="mb-1">Toutes les commandes</h6>
+                                <p class="small text-muted mb-0">Voir l'historique complet</p>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Commandes récentes -->
-    <div class="bg-white rounded-lg shadow mb-8">
-        <div class="border-b px-6 py-3 flex justify-between items-center">
-            <h2 class="text-xl font-semibold">Commandes récentes</h2>
-            <a href="{{ route('admin.orders.index') }}" class="text-blue-500 hover:text-blue-700 text-sm">
-                Voir toutes <i class="fas fa-arrow-right ml-1"></i>
-            </a>
-        </div>
-        <div class="p-4">
-            @if($recentOrders->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-                                <th class="py-3 px-6 text-left">N° Commande</th>
-                                <th class="py-3 px-6 text-left">Client</th>
-                                <th class="py-3 px-6 text-left">Utilisateur</th>
-                                <th class="py-3 px-6 text-left">Date</th>
-                                <th class="py-3 px-6 text-center">Statut</th>
-                                <th class="py-3 px-6 text-center">Actions</th>
+</div>
+
+<div class="card">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-history me-2 text-primary"></i>Commandes récentes</h5>
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-outline-primary">
+            Voir toutes <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+    </div>
+    <div class="card-body p-0">
+        @if($recentOrders->count() > 0)
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>N° Commande</th>
+                            <th>Client</th>
+                            <th>Utilisateur</th>
+                            <th>Date</th>
+                            <th class="text-center">Statut</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($recentOrders as $order)
+                            @php
+                                $statusName = $order->orderStatus->name ?? 'Inconnu';
+                                $badge = match($statusName) {
+                                    'Nouvelle' => 'bg-info-subtle text-info',
+                                    'En traitement' => 'bg-warning-subtle text-warning',
+                                    'En production' => 'bg-primary-subtle text-primary',
+                                    'Expédié' => 'bg-info-subtle text-info',
+                                    'Complété' => 'bg-success-subtle text-success',
+                                    'Annulé' => 'bg-danger-subtle text-danger',
+                                    default => 'bg-secondary-subtle text-secondary',
+                                };
+                            @endphp
+                            <tr>
+                                <td class="fw-semibold text-primary">#{{ $order->id }}</td>
+                                <td>{{ $order->client->name ?? '—' }}</td>
+                                <td>{{ $order->user->name ?? '—' }}</td>
+                                <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill {{ $badge }}">{{ $statusName }}</span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-light border" title="Voir détails">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody class="text-gray-600 text-sm">
-                            @foreach($recentOrders as $order)
-                                <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                    <td class="py-3 px-6 text-left whitespace-nowrap">
-                                        #{{ $order->id }}
-                                    </td>
-                                    <td class="py-3 px-6 text-left">
-                                        {{ $order->client->name }}
-                                    </td>
-                                    <td class="py-3 px-6 text-left">
-                                        {{ $order->user->name }}
-                                    </td>
-                                    <td class="py-3 px-6 text-left">
-                                        {{ $order->created_at->format('d/m/Y H:i') }}
-                                    </td>
-                                    <td class="py-3 px-6 text-center">
-                                        <span class="px-2 py-1 rounded-full text-xs 
-                                            @if($order->orderStatus->name == 'Nouvelle')
-                                                bg-blue-100 text-blue-800
-                                            @elseif($order->orderStatus->name == 'En traitement')
-                                                bg-yellow-100 text-yellow-800
-                                            @elseif($order->orderStatus->name == 'En production')
-                                                bg-orange-100 text-orange-800
-                                            @elseif($order->orderStatus->name == 'Expédié')
-                                                bg-green-100 text-green-800
-                                            @elseif($order->orderStatus->name == 'Complété')
-                                                bg-green-100 text-green-800
-                                            @elseif($order->orderStatus->name == 'Annulé')
-                                                bg-red-100 text-red-800
-                                            @else
-                                                bg-gray-100 text-gray-800
-                                            @endif
-                                        ">
-                                            {{ $order->orderStatus->name }}
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-6 text-center">
-                                        <a href="{{ route('admin.orders.show', $order->id) }}" class="text-blue-500 hover:text-blue-700 mx-1" title="Voir détails">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4">
-                    <p>Aucune commande n'a encore été passée.</p>
-                </div>
-            @endif
-        </div>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="text-center py-5 px-3">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <p class="text-muted mb-0">Aucune commande n'a encore été passée.</p>
+            </div>
+        @endif
     </div>
 </div>
 @endsection
